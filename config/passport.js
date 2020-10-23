@@ -1,5 +1,5 @@
 const LocalStrategy = require('passport-local').Strategy
-const bcrypt = require('bcryptjs')
+const argon2 = require('argon2')
 
 // LOAD USER MODEL
 const User = require('../models/User')
@@ -16,14 +16,16 @@ module.exports = function (passport) {
             })
           }
           // MATCH PASSWORD
-          bcrypt.compare(password, user.password, (err, isMatch) => {
-            if (err) throw err
-            if (isMatch) {
-              return done(null, user)
-            } else {
-              return done(null, false, { message: 'Password incorrect' })
-            }
-          })
+          argon2
+            .verify(user.password, password)
+            .then(match => {
+              if (match) {
+                return done(null, user)
+              } else {
+                return done(null, false, { message: 'Password incorrect' })
+              }
+            })
+            .catch(err => console.log(err))
         })
         .catch(err => console.log(err))
     })

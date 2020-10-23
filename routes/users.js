@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const bcrypt = require('bcryptjs')
+const argon2 = require('argon2')
 const passport = require('passport')
 
 // USER MODEL
@@ -58,9 +58,9 @@ router.post('/register', (req, res) => {
         })
 
         // HASH PASSWORD
-        bcrypt.genSalt(10, (err, salt) =>
-          bcrypt.hash(newUser.password, salt, (err, hash) => {
-            if (err) throw err
+        argon2
+          .hash(newUser.password)
+          .then(hash => {
             // SET PASSWORD TO HASHED
             newUser.password = hash
             // SAVE USER
@@ -72,7 +72,7 @@ router.post('/register', (req, res) => {
               })
               .catch(err => console.log(err))
           })
-        )
+          .catch(err => console.log(err))
       }
     })
   }
