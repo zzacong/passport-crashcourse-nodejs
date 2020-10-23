@@ -1,0 +1,16 @@
+{
+  "_id": {
+    "$oid": "5f9264a25b8dec47b232c507"
+  },
+  "name": "John Fire",
+  "email": "johnfire@gmail.com",
+  "password": "$argon2i$v=19$m=4096,t=3,p=1$4spqjLpppsPW0xZ4GsbPsA$18Dw8k55325kgYSdkwz5BsqY3Sq76mV+klVSpo1PKiQ",
+  "date": {
+    "$date": {
+      "$numberLong": "1603429538782"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+}
