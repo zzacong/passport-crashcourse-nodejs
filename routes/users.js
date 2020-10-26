@@ -15,7 +15,7 @@ router.get('/login', checkAuthenticated, (req, res) => res.render('login'))
 router.get('/register', (req, res) => res.render('register'))
 
 // REGISTER HANDLE
-router.post('/register', (req, res) => {
+router.post('/register', async (req, res) => {
   const { name, email, password, password2 } = req.body
   let errors = []
   // CHECK REQUIRED FIELDS
@@ -41,7 +41,8 @@ router.post('/register', (req, res) => {
     })
   } else {
     // VALIDATION PASS
-    User.findOne({ email: email }).then(user => {
+    try {
+      const user = await User.findOne({ email: email })
       if (user) {
         // USER EXISTS
         errors.push({ msg: 'Email is already registered' })
@@ -53,30 +54,31 @@ router.post('/register', (req, res) => {
           password2,
         })
       } else {
+        // CREATE NEW USER
         const newUser = new User({
           name,
           email,
           password,
         })
-
         // HASH PASSWORD
-        argon2
-          .hash(newUser.password)
-          .then(hash => {
-            // SET PASSWORD TO HASHED
-            newUser.password = hash
-            // SAVE USER
-            newUser
-              .save()
-              .then(user => {
-                req.flash('success_msg', 'You are now registered and can login')
-                res.redirect('/users/login')
-              })
-              .catch(err => console.log('err1: ', err))
-          })
-          .catch(err => console.log('err2: ', err))
+        const hashed = await argon2.hash(newUser.password)
+        // SET PASSWORD TO HASHED
+        newUser.password = hashed
+        await newUser.save()
+        req.flash('success_msg', 'You are now registered and can login')
+        res.redirect('/users/login')
       }
-    })
+    } catch (error) {
+      console.log('error: ', error)
+      errors.push({ msg: 'Something went wrong. Try again.' })
+      res.render('register', {
+        errors,
+        name,
+        email,
+        password,
+        password2,
+      })
+    }
   }
 })
 

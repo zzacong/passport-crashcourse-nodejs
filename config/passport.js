@@ -6,29 +6,31 @@ const User = require('../models/User')
 
 module.exports = function (passport) {
   passport.use(
-    new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
-      // MATCH USER
-      User.findOne({ email: email })
-        .then(user => {
+    new LocalStrategy(
+      { usernameField: 'email' },
+      async (email, password, done) => {
+        // MATCH USER
+        try {
+          const user = await User.findOne({ email: email })
           if (!user) {
             return done(null, false, {
               message: 'That email is not registered',
             })
           }
-          // MATCH PASSWORD
-          argon2
-            .verify(user.password, password)
-            .then(match => {
-              if (match) {
-                return done(null, user)
-              } else {
-                return done(null, false, { message: 'Password incorrect' })
-              }
-            })
-            .catch(err => console.log(err))
-        })
-        .catch(err => console.log(err))
-    })
+          try {
+            if (await argon2.verify(user.password, password)) {
+              return done(null, user)
+            } else {
+              return done(null, false, { message: 'Password incorrect' })
+            }
+          } catch (error) {
+            console.log(error)
+          }
+        } catch (error) {
+          console.log(error)
+        }
+      }
+    )
   )
   passport.serializeUser((user, done) => {
     done(null, user.id)
