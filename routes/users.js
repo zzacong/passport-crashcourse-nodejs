@@ -3,11 +3,13 @@ const router = express.Router()
 const argon2 = require('argon2')
 const passport = require('passport')
 
+const { checkAuthenticated } = require('../config/auth')
+
 // USER MODEL
 const User = require('../models/User')
 
 // LOGIN PAGE
-router.get('/login', (req, res) => res.render('login'))
+router.get('/login', checkAuthenticated, (req, res) => res.render('login'))
 
 // REGISTER PAGE
 router.get('/register', (req, res) => res.render('register'))
@@ -70,9 +72,9 @@ router.post('/register', (req, res) => {
                 req.flash('success_msg', 'You are now registered and can login')
                 res.redirect('/users/login')
               })
-              .catch(err => console.log(err))
+              .catch(err => console.log('err1: ', err))
           })
-          .catch(err => console.log(err))
+          .catch(err => console.log('err2: ', err))
       }
     })
   }
