@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express = require('express')
 const expressLayouts = require('express-ejs-layouts')
 const mongoose = require('mongoose')
@@ -11,13 +13,15 @@ const app = express()
 require('./config/passport')(passport)
 
 // DB CONFIG
-const db = require('./config/keys').MongoUri
+const dbUri = require('./config/keys').MongoUri
 
 // CONNECT TO MONGODB
-mongoose
-  .connect(db, { useNewUrlParser: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err))
+mongoose.connect(dbUri, { useNewUrlParser: true })
+const db = mongoose.connection
+db.on('error', error => console.log(error))
+db.once('open', () => console.log('MongoDB connected'))
+// .then(() => console.log('MongoDB connected'))
+//   .catch(err => console.log(err))
 
 // EJS
 app.use(expressLayouts)
